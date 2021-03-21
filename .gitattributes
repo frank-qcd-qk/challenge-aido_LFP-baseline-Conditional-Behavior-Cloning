@@ -1,0 +1,2 @@
+duckieTrainer/train.log filter=lfs diff=lfs merge=lfs -text
+duckieChallenger/FrankNet.h5 filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,8 @@
+protocol: aido2_db18_agent-z2
+challenge: [aido-LF-sim-validation,aido-LFP-sim-validation]
+#challenge: [ LF-experimentation-anc,LFP-experimentation-anc ]
+user-label: "CBC Net v1"
+user-payload:
+    features_required:
+        gpu: 1
+description: March 13 training, best loss data

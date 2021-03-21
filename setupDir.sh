@@ -1,0 +1,1 @@
+export PYTHONPATH="/home/frank/duckietown/aido6/csc2626/${PYTHONPATH:+:${PYTHONPATH}}"

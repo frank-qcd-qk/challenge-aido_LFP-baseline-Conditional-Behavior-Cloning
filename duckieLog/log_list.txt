@@ -1,0 +1,15 @@
+/home/frank/duckietown/aido6/log_sources/Mar7_zig_zag_obstacle1.log
+/home/frank/duckietown/aido6/log_sources/Mar7_zig_zag_obstacle2.log
+/home/frank/duckietown/aido6/log_sources/Mar7_zig_zag_obstacle3.log
+/home/frank/duckietown/aido6/log_sources/Mar7_zig_zag_obstacle4.log
+/home/frank/duckietown/aido6/log_sources/Mar7_zig_zag_obstacle5.log
+/home/frank/duckietown/aido6/log_sources/Mar7_zig_zag_obstacle6.log
+/home/frank/duckietown/aido6/log_sources/Mar7_zig_zag_obstacle7.log
+/home/frank/duckietown/aido6/log_sources/feb26dataonly.log
+/home/frank/duckietown/aido6/log_sources/feb26_loop_obstacles.log
+/home/frank/duckietown/aido6/log_sources/feb26_loop_obstacles2.log
+/home/frank/duckietown/aido6/log_sources/feb26_zigzag.log
+/home/frank/duckietown/aido6/log_sources/mar6_obstacle1.log
+/home/frank/duckietown/aido6/log_sources/mar6_obstacle2.log
+/home/frank/duckietown/aido6/log_sources/mar6_zigzag1.log
+/home/frank/duckietown/aido6/log_sources/mar6_zigzag2.log

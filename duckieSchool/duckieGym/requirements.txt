@@ -1,0 +1,6 @@
+tensorflow==2.4.0
+numpy
+opencv-python
+scikit-learn
+tqdm
+duckietown-gym-daffy
