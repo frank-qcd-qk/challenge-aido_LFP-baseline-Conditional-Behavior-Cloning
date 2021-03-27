@@ -85,7 +85,7 @@ class cbcNetv2:
         return cmd_model, anomaly_model
 
     @staticmethod
-    def get_anomaly_inference(weigths="cbcNet.h5", input_shape=(150, 200, 3)):
+    def get_anomaly_inference(weigths="cbcNetv2_anomaly.h5", input_shape=(150, 200, 3)):
         rgb_input = tf.keras.Input(shape=input_shape)
         anomaly_detection = cbcNetv2.build_cbc_anomaly_detector(rgb_input)
         model = tf.keras.Model(inputs=rgb_input, outputs=anomaly_detection, name="cbcNet-anomaly")
@@ -93,6 +93,10 @@ class cbcNetv2:
         return model
 
     @staticmethod
-    def get_bc_inference(weigths="cbcNet.h5"):
+    def get_bc_inference(weigths="cbcNet_bc.h5", input_shape=(150, 200, 3)):
         rgb_input = tf.keras.Input(shape=input_shape)
         anomaly_input = tf.keras.Input(shape=(1))
+        bc_output = cbcNetv2.build_cbc_net(rgb_input, anomaly_input)
+        model = tf.keras.Model(inputs=[rgb_input, anomaly_input], outputs=bc_output, name="cbcNet-bc")
+        model.load_weights(weigths)
+        return model

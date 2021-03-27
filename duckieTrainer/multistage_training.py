@@ -19,7 +19,8 @@ INIT_LR = 1e-3
 BATCH_SIZE = 128
 TRAIN_PERCENT = 0.8
 TRAINING_DATASET = "train.log"
-OPMODE = "bc"
+OPMODE = "Anomaly"
+OPMODE = "BC"
 
 
 class DuckieTrainer:
@@ -59,7 +60,7 @@ class DuckieTrainer:
             self.train_bc_net()
 
     def train_anomaly_detector(self):
-        callbacks_list = self.configure_callbacks("anomaly")
+        callbacks_list = self.configure_callbacks("Anomaly")
 
         # 11. GO!
         history = self.anomaly_model.fit(

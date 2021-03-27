@@ -9,6 +9,8 @@ from aido_schemas import (Context, DB20Commands, DB20Observations, EpisodeStart,
 
 from helperFncs import image_resize
 
+MULTI_NET = True
+
 
 def test_payload():
     import tensorflow as tf
@@ -46,12 +48,19 @@ class DuckieChallenger:
         test_payload()
         self.check_tensorflow_gpu()
 
-        from cbcNet import cbcNet
         from helperFncs import SteeringToWheelVelWrapper
         self.convertion_wrapper = SteeringToWheelVelWrapper()
 
         context.info('init()')
-        self.model = cbcNet.get_inference("cbcNet.h5")
+
+        if MULTI_NET:
+            from cbcNetv2 import cbcNetv2
+            self.anomaly_model = cbcNetv2.get_anomaly_inference("cbcNetv2_anomaly.h5")
+            self.bc_model = cbcNetv2.get_bc_inference("cbcNetv2_bc.h5")
+        else:
+            from cbcNet import cbcNet
+            self.model = cbcNet.get_inference("cbcNet.h5")
+
         self.current_image = np.zeros(self.expect_shape)
         self.input_image = np.zeros((150, 200, 3))
         self.to_predictor = np.expand_dims(self.input_image, axis=0)
@@ -87,7 +96,11 @@ class DuckieChallenger:
 
     # ! Modification here! Return with action.
     def compute_action(self, observation):
-        prediction, anomaly = self.model.predict(observation)
+        if MULTI_NET:
+            anomaly = self.anomaly_model.predict(observation)
+            prediction = self.bc_model.predict([observation, anomaly])
+        else:
+            prediction, anomaly = self.model.predict(observation)
         print("Road Anomaly Detection: {}".format(anomaly))
         return prediction[0][0], prediction[0][1]
 

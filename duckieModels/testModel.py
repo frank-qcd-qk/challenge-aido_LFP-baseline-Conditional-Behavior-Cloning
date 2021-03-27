@@ -21,9 +21,9 @@ def get_model_summary(model):
 
 def load_anomaly_example(anomaly):
     if anomaly:
-        file = open("anomaly_img", 'rb')
+        file = open("tests/anomaly_img", 'rb')
     else:
-        file = open("normal_img", 'rb')
+        file = open("tests/normal_img", 'rb')
     imgs = pickle.load(file)
     file.close()
     return imgs

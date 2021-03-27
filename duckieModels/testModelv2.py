@@ -20,9 +20,9 @@ def get_model_summary(model):
 
 def load_anomaly_example(anomaly):
     if anomaly:
-        file = open("anomaly_img", 'rb')
+        file = open("tests/anomaly_img", 'rb')
     else:
-        file = open("normal_img", 'rb')
+        file = open("tests/normal_img", 'rb')
     imgs = pickle.load(file)
     file.close()
     return imgs
@@ -104,5 +104,12 @@ def log_visualize_attention(model, logdir="Mar8_zig_zag_more_ducks.log"):
 
 
 if __name__ == "__main__":
-    loaded_model = cbcNetv2.get_anomaly_inference(weigths="cbcNet-anomaly-Best_Validation.h5")
-    log_visualize_attention(loaded_model)
+    anomaly_model = cbcNetv2.get_anomaly_inference("cbcNetv2_anomaly.h5")
+    bc_model = cbcNetv2.get_bc_inference("cbcNetv2_bc.h5")
+    imgs = load_anomaly_example(True)
+    for an_img in imgs:
+        observation = np.expand_dims(an_img, axis=0)
+        anomaly = anomaly_model.predict(observation)
+        prediction = bc_model.predict([observation, anomaly])
+        print("Anomaly={}, GT=True, at {}".format(anomaly[0][0] > 0.5, round(anomaly[0][0], 2)))
+        print("Prediction report: {}".format(prediction))
