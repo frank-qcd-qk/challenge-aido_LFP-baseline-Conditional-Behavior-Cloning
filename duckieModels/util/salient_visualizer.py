@@ -1,4 +1,3 @@
-# Code adapted from: https://github.com/kaland313/Duckietown-RL Author: András Kalapos (AIDO5 Winner)
 import cv2
 import numpy as np
 import tensorflow as tf
@@ -17,13 +16,15 @@ def nvidia_salient_map(model: tf.keras.Model, obs, output_vector_idx=None):
     Explaining How a Deep Neural Network Trained with End-to-End Learning Steers a Car
     https://arxiv.org/abs/1704.07911
     """
-    layer_outputs = [model.layers[find_layer_by_name(model, 'conv_out')].output,
-                     model.layers[find_layer_by_name(model, 'conv3')].output,
-                     model.layers[find_layer_by_name(model, 'conv2')].output,
-                     model.layers[find_layer_by_name(model, 'conv1')].output]
+    layer_outputs = [model.layers[find_layer_by_name(model, 'BC_Conv5')].output,
+                     model.layers[find_layer_by_name(model, 'BC_Conv4')].output,
+                     model.layers[find_layer_by_name(model, 'BC_Conv3')].output,
+                     model.layers[find_layer_by_name(model, 'BC_Conv2')].output,
+                     model.layers[find_layer_by_name(model, 'BC_Conv1')].output]
     model_partial = tf.keras.Model(inputs=model.inputs, outputs=layer_outputs)
     activations = model_partial.predict(obs[None, ...])
-
+    for an_activation in activations:
+        print(an_activation.shape)
     if output_vector_idx is None:
         salient_map = np.average(activations[0][0, :, :, :], axis=2)
     else:
