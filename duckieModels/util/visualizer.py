@@ -3,10 +3,10 @@ import pickle
 import cv2
 import numpy as np
 import tensorflow as tf
-from cbcNetv2 import cbcNetv2
 from matplotlib import cm
-from matplotlib import pyplot as plt
-from vis.visualization import visualize_cam, overlay
+from vis.visualization import visualize_cam
+
+from duckieModels.cbcNetv2 import cbcNetv2
 
 
 def get_model_summary(model):
@@ -42,27 +42,8 @@ def anomaly_naive_test(model):
         print("Anomaly={}, GT=False, at {}".format(anomaly[0][0] > 0.5, round(anomaly[0][0], 2)))
 
 
-def model_vis(model):
-    images = np.asarray(load_anomaly_example(anomaly=False))
-    input_img = images[0]
-    plt_img = cv2.cvtColor(input_img, cv2.COLOR_YUV2BGR)
-    titles = ["Input", "Attention"]
-    subplot_args = {'nrows': 1, 'ncols': 2, 'figsize': (9, 3),
-                    'subplot_kw': {'xticks': [], 'yticks': []}}
-    f, ax = plt.subplots(**subplot_args)
-    heatmap = visualize_cam(model, layer_idx=-1, filter_indices=0,
-                            seed_input=input_img, grad_modifier=None)
-    jet_heatmap = np.uint8(cm.jet(heatmap)[..., :3] * 255)
-
-    for i, modifier in enumerate(titles):
-        ax[i].set_title(titles[i], fontsize=14)
-    ax[0].imshow(plt_img)
-    ax[1].imshow(overlay(plt_img, jet_heatmap, alpha=0.75))
-    plt.tight_layout()
-    plt.show()
-
-
-def log_visualize_attention(model, logdir="Mar8_zig_zag_more_ducks.log"):
+def anomaly_detection_attention(model, logdir="../tests/ducks.log"):
+    model = cbcNetv2.get_anomaly_inference(model)
     from duckieLog.log_util import read_dataset
     observation, prediction, anomaly = read_dataset(
         logdir
@@ -102,13 +83,9 @@ def log_visualize_attention(model, logdir="Mar8_zig_zag_more_ducks.log"):
     out.release()
 
 
-if __name__ == "__main__":
-    anomaly_model = cbcNetv2.get_anomaly_inference("cbcNetv2_anomaly.h5")
-    bc_model = cbcNetv2.get_bc_inference("cbcNetv2_bc.h5")
-    imgs = load_anomaly_example(True)
-    for an_img in imgs:
-        observation = np.expand_dims(an_img, axis=0)
-        anomaly = anomaly_model.predict(observation)
-        prediction = bc_model.predict([observation, anomaly])
-        print("Anomaly={}, GT=True, at {}".format(anomaly[0][0] > 0.5, round(anomaly[0][0], 2)))
-        print("Prediction report: {}".format(prediction))
+if __name__ == '__main__':
+    # COVVisualizerNode = COVVisualizer("cbcNet.h5", "../tests/curve.jpg")
+    # COVVisualizerNode.visualize()
+    # get_model_summary()
+    # imgs = load_anomaly_example(True)
+    anomaly_detection_attention("../cbcNetv2_anomaly.h5")
