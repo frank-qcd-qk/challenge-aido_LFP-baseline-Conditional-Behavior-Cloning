@@ -9,7 +9,7 @@ from aido_schemas import (Context, DB20Commands, DB20Observations, EpisodeStart,
 
 from helperFncs import image_resize
 
-MULTI_NET = True
+MULTI_NET = False
 
 
 def test_payload():

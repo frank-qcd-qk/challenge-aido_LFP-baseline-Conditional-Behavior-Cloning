@@ -16,3 +16,5 @@ trainlogs
 requirements.resolved
 !duckieChallenger/FrankNet.h5
 duckieTrainer/train.log
+/duckieSchool/duckieWinner/
+*.tfRecord

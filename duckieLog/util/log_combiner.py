@@ -12,7 +12,7 @@ SCHEMA_VERSION = "1.0.0"
 
 class Combiner:
     def __init__(self, output):
-        self.log_lists = open("log_list.txt", 'rb')
+        self.log_lists = open("../log_list.txt", 'rb')
         self.log_dirs = self.log_lists.read().splitlines()
         self._log_objects = []
         for a_log_file in self.log_dirs:
@@ -48,7 +48,7 @@ class Combiner:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output", default="train.log")
+    parser.add_argument("--output", default="../train.log")
     args = parser.parse_args()
 
     Combiner(args.output)

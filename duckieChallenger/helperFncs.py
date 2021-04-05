@@ -28,6 +28,27 @@ class SteeringToWheelVelWrapper:
         # Distance between wheels
         self.wheel_dist = wheel_dist
 
+    def fk(self, pwm_left, pwm_right):
+        u_r = pwm_right
+        u_l = pwm_left
+
+        # Distance between the wheels
+        baseline = self.wheel_dist
+
+        # assuming same motor constants k for both motors
+        k_r = self.k
+        k_l = self.k
+
+        # adjusting k by gain and trim
+        k_r_inv = (self.gain + self.trim) / k_r
+        k_l_inv = (self.gain - self.trim) / k_l
+
+        omega_r = u_r / k_r_inv
+        omega_l = u_l / k_l_inv
+
+        linear = self.radius * (omega_r + omega_l) / 2
+        angular = self.radius * (omega_r - omega_l) / baseline
+
     def convert(self, vel, angle):
         # Distance between the wheels
         baseline = self.wheel_dist
