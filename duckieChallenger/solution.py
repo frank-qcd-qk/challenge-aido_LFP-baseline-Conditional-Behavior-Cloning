@@ -20,7 +20,7 @@ def test_payload():
     print("System CUDA observed: {}".format(os.system("nvcc -V")))
 
 
-def limit_gpu_memory(memory_limit=1024):
+def limit_gpu_memory(memory_limit=16384):
     """ Restricts TensorFlow to only allocated 1GB of memory on the first GPU"""
     import tensorflow as tf
     physical_gpus = tf.config.experimental.list_physical_devices('GPU')

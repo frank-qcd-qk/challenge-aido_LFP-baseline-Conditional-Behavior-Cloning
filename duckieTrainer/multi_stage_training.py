@@ -5,12 +5,9 @@ from datetime import datetime
 from pathlib import Path
 
 import tensorflow as tf
-from sklearn.model_selection import train_test_split
 
-from duckieLog.log_util import read_dataset
 from duckieModels.cbcNetv2 import cbcNetv2
 
-MODEL_NAME = "cbcNet"
 logging.basicConfig(level=logging.INFO)
 
 # ! Default Configuration
@@ -18,9 +15,10 @@ EPOCHS = 100
 INIT_LR = 1e-3
 BATCH_SIZE = 128
 TRAIN_PERCENT = 0.8
-TRAINING_DATASET = "train.log"
+FILE_PREFIX = "train"
 OPMODE = "Anomaly"
-OPMODE = "BC"
+# OPMODE = "BC"
+MODEL_NAME = "cbcNet_Multi_Stage"
 
 
 class DuckieTrainer:
@@ -29,31 +27,33 @@ class DuckieTrainer:
             epochs,
             init_lr,
             batch_size,
-            log_file,
-            split,
+            log_name
+
     ):
         self.batch_size = batch_size
         # 0. Setup Folder Structure
         self.create_dirs()
+        self.TRAINING_DATASET = "{}_training.tfRecord".format(log_name)
+        self.VALIDATION_DATASET = "{}_validation.tfRecord".format(log_name)
 
         # 1. Load Data
-        self.observation, self.prediction, self.anomaly = read_dataset(
-            log_file
-        )
+        self.batch_size = batch_size
+        self.feature_description = {
+            'observation': tf.io.FixedLenFeature([], tf.string),
+            'action': tf.io.FixedLenFeature([], tf.string),
+            'anomaly': tf.io.FixedLenFeature([], tf.string),
+        }
+        raw_train_dataset = tf.data.TFRecordDataset(self.TRAINING_DATASET)
+        raw_valid_dataset = tf.data.TFRecordDataset(self.VALIDATION_DATASET)
 
         # 2. Split training and testing
-        (
-            self.observation_train,
-            self.observation_valid,
-            self.prediction_train,
-            self.prediction_valid,
-            self.anomaly_train,
-            self.anomaly_valid
+        self.train_dataset = raw_train_dataset.map(self.parse_functions).map(self.ingest_tfRecord).batch(
+            self.batch_size)
+        self.valid_dataset = raw_valid_dataset.map(self.parse_functions).map(self.ingest_tfRecord).batch(
+            self.batch_size)
 
-        ) = train_test_split(
-            self.observation, self.prediction, self.anomaly, test_size=1 - split, shuffle=False
-        )
         self.cmd_model, self.anomaly_model = cbcNetv2.get_model(init_lr, epochs)
+
         if OPMODE == "Anomaly":
             self.train_anomaly_detector()
         else:
@@ -64,12 +64,8 @@ class DuckieTrainer:
 
         # 11. GO!
         history = self.anomaly_model.fit(
-            x=self.observation_train,
-            y=self.anomaly_train,
-            validation_data=(
-                self.observation_valid,
-                self.anomaly_valid,
-            ),
+            x=self.train_dataset,
+            validation_data=self.valid_dataset,
             epochs=EPOCHS,
             callbacks=callbacks_list,
             shuffle=True,
@@ -82,12 +78,8 @@ class DuckieTrainer:
 
         # 11. GO!
         history = self.cmd_model.fit(
-            x=[self.observation_train, self.anomaly_train],
-            y=self.prediction_train,
-            validation_data=(
-                [self.observation_valid, self.anomaly_valid],
-                self.prediction_valid
-            ),
+            x=self.train_dataset,
+            validation_data=self.valid_dataset,
             epochs=EPOCHS * 2,
             callbacks=callbacks_list,
             shuffle=True,
@@ -104,6 +96,24 @@ class DuckieTrainer:
                 "Create folder for trained model failed. Please check system permissions."
             )
             exit()
+
+    def parse_functions(self, example_proto):
+        # Parse the input `tf.train.Example` proto using the dictionary above.
+        return tf.io.parse_single_example(example_proto, self.feature_description)
+
+    def ingest_tfRecord(self, tf_example):
+        """Given a tf_example dict, separates into feature_dict and target_dict"""
+        # print(tf_example)
+        raw_img = tf_example['observation']
+        raw_anomaly = tf_example['anomaly']
+        raw_pred = tf_example['action']
+        observation = tf.reshape(tf.io.decode_raw(raw_img, tf.uint8), shape=(150, 200, 3))
+        anomaly = tf.io.decode_raw(raw_anomaly, tf.int32)
+        action = tf.io.decode_raw(raw_pred, tf.float64)
+        if OPMODE == "Anomaly":
+            return observation, anomaly
+        else:
+            return (observation, anomaly), action
 
     def configure_callbacks(self, type):
         tensorboard = tf.keras.callbacks.TensorBoard(
@@ -138,19 +148,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--batch_size", help="Set the batch size", default=BATCH_SIZE)
     parser.add_argument(
-        "--training_dataset", help="Set the training log file name", default=TRAINING_DATASET
-    )
-    parser.add_argument(
-        "--split", help="Set the training and test split point (input the percentage of training)",
-        default=TRAIN_PERCENT
+        "--training_dataset", help="Set the training TF Record prefix name", default=FILE_PREFIX
     )
 
     args = parser.parse_args()
-
     DuckieTrainer(
         epochs=int(args.epochs),
         init_lr=float(args.learning_rate),
         batch_size=int(args.batch_size),
-        log_file=args.training_dataset,
-        split=float(args.split)
+        log_name=args.training_dataset,
     )

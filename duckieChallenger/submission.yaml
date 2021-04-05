@@ -1,6 +1,6 @@
 protocol: aido2_db18_agent-z2
 challenge: [aido-LF-sim-validation,aido-LFP-sim-validation]
-user-label: "CBC Net - MixTraining - Expert LF Human LFP"
+user-label: "CBC Net - MixTraining - Expert LF Human LFP - Best Loss"
 user-payload:
     features_required:
         gpu: 1

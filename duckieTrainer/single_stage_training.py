@@ -8,7 +8,6 @@ import tensorflow as tf
 
 from duckieModels.cbcNet import cbcNet
 
-MODEL_NAME = "cbcNet_Single_Stage"
 logging.basicConfig(level=logging.INFO)
 
 # ! Default Configuration
@@ -17,6 +16,7 @@ INIT_LR = 1e-3
 BATCH_SIZE = 128
 TRAIN_PERCENT = 0.8
 FILE_PREFIX = "train"
+MODEL_NAME = "cbcNet_Single_Stage"
 
 
 class DuckieTrainer:
@@ -32,6 +32,7 @@ class DuckieTrainer:
         self.create_dirs()
         self.TRAINING_DATASET = "{}_training.tfRecord".format(log_name)
         self.VALIDATION_DATASET = "{}_validation.tfRecord".format(log_name)
+
         # 1. Load Data
         self.batch_size = batch_size
         self.feature_description = {
@@ -88,7 +89,7 @@ class DuckieTrainer:
         observation = tf.reshape(tf.io.decode_raw(raw_img, tf.uint8), shape=(150, 200, 3))
         anomaly = tf.io.decode_raw(raw_anomaly, tf.int32)
         action = tf.io.decode_raw(raw_pred, tf.float64)
-        return (observation, (action, anomaly))
+        return observation, (action, anomaly)
 
     def configure_callbacks(self):
         tensorboard = tf.keras.callbacks.TensorBoard(
